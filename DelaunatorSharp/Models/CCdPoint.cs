@@ -7,13 +7,13 @@ namespace DelaunatorSharp.Models
    /// <summary>
    /// 기존 Point에 고도값이나, 기타 정보를 포함하기 위해서.
    /// </summary>
-	public struct CmPoint : IPoint
+	public struct CCdPoint : IPoint
    {
       public double X { get; set; }
       public double Y { get; set; }
       public object tag { get; set; }
 
-      public CmPoint(double x, double y, object userTag = null )
+      public CCdPoint(double x, double y, object userTag = null )
       {
          X = x;
          Y = y;

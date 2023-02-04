@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DelaunatorSharp.Benchmark
 {
-    [SimpleJob(RunStrategy.ColdStart, warmupCount:10, targetCount: 10)]
+    [SimpleJob(RunStrategy.ColdStart, warmupCount:10)]
     [HtmlExporter]
     public class GetVoronoiCellsBenchmark
     {
