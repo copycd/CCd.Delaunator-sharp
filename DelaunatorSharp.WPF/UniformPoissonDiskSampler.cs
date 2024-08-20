@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using SlimDX;
+using CCd.Maths;
 
 namespace DelaunatorSharp.WPF
 {
@@ -20,8 +20,8 @@ namespace DelaunatorSharp.WPF
 
         struct Settings
         {
-            public Vector2 TopLeft, LowerRight, Center;
-            public Vector2 Dimensions;
+            public Vector2D TopLeft, LowerRight, Center;
+            public Vector2D Dimensions;
             public float? RejectionSqDistance;
             public float MinimumDistance;
             public float CellSize;
@@ -30,29 +30,29 @@ namespace DelaunatorSharp.WPF
 
         struct State
         {
-            public Vector2?[,] Grid;
-            public List<Vector2> ActivePoints, Points;
+            public Vector2D?[,] Grid;
+            public List<Vector2D> ActivePoints, Points;
         }
 
-        public static List<Vector2> SampleCircle(Vector2 center, float radius, float minimumDistance)
+        public static List<Vector2D> SampleCircle(Vector2D center, float radius, float minimumDistance)
         {
             return SampleCircle(center, radius, minimumDistance, DefaultPointsPerIteration);
         }
-        public static List<Vector2> SampleCircle(Vector2 center, float radius, float minimumDistance, int pointsPerIteration)
+        public static List<Vector2D> SampleCircle(Vector2D center, float radius, float minimumDistance, int pointsPerIteration)
         {
-            return Sample(center - new Vector2(radius), center + new Vector2(radius), radius, minimumDistance, pointsPerIteration);
+            return Sample(center - new Vector2D(radius), center + new Vector2D(radius), radius, minimumDistance, pointsPerIteration);
         }
 
-        public static List<Vector2> SampleRectangle(Vector2 topLeft, Vector2 lowerRight, float minimumDistance)
+        public static List<Vector2D> SampleRectangle(Vector2D topLeft, Vector2D lowerRight, float minimumDistance)
         {
             return SampleRectangle(topLeft, lowerRight, minimumDistance, DefaultPointsPerIteration);
         }
-        public static List<Vector2> SampleRectangle(Vector2 topLeft, Vector2 lowerRight, float minimumDistance, int pointsPerIteration)
+        public static List<Vector2D> SampleRectangle(Vector2D topLeft, Vector2D lowerRight, float minimumDistance, int pointsPerIteration)
         {
             return Sample(topLeft, lowerRight, null, minimumDistance, pointsPerIteration);
         }
 
-        static List<Vector2> Sample(Vector2 topLeft, Vector2 lowerRight, float? rejectionDistance, float minimumDistance, int pointsPerIteration)
+        static List<Vector2D> Sample(Vector2D topLeft, Vector2D lowerRight, float? rejectionDistance, float minimumDistance, int pointsPerIteration)
         {
             var settings = new Settings
             {
@@ -69,9 +69,9 @@ namespace DelaunatorSharp.WPF
 
             var state = new State
             {
-                Grid = new Vector2?[settings.GridWidth, settings.GridHeight],
-                ActivePoints = new List<Vector2>(),
-                Points = new List<Vector2>()
+                Grid = new Vector2D?[settings.GridWidth, settings.GridHeight],
+                ActivePoints = new List<Vector2D>(),
+                Points = new List<Vector2D>()
             };
 
             AddFirstPoint(ref settings, ref state);
@@ -104,8 +104,8 @@ namespace DelaunatorSharp.WPF
                 d = RandomHelper.Random.NextDouble();
                 var yr = settings.TopLeft.Y + settings.Dimensions.Y * d;
 
-                var p = new Vector2((float)xr, (float)yr);
-                if (settings.RejectionSqDistance != null && Vector2.DistanceSquared(settings.Center, p) > settings.RejectionSqDistance)
+                var p = new Vector2D((float)xr, (float)yr);
+                if (settings.RejectionSqDistance != null && Vector2D.DistanceSquared(settings.Center, p) > settings.RejectionSqDistance)
                     continue;
                 added = true;
 
@@ -118,21 +118,21 @@ namespace DelaunatorSharp.WPF
             }
         }
 
-        static bool AddNextPoint(Vector2 point, ref Settings settings, ref State state)
+        static bool AddNextPoint(Vector2D point, ref Settings settings, ref State state)
         {
             var found = false;
             var q = GenerateRandomAround(point, settings.MinimumDistance);
 
             if (q.X >= settings.TopLeft.X && q.X < settings.LowerRight.X &&
                 q.Y > settings.TopLeft.Y && q.Y < settings.LowerRight.Y &&
-                (settings.RejectionSqDistance == null || Vector2.DistanceSquared(settings.Center, q) <= settings.RejectionSqDistance))
+                (settings.RejectionSqDistance == null || Vector2D.DistanceSquared(settings.Center, q) <= settings.RejectionSqDistance))
             {
                 var qIndex = Denormalize(q, settings.TopLeft, settings.CellSize);
                 var tooClose = false;
 
                 for (var i = (int)Math.Max(0, qIndex.X - 2); i < Math.Min(settings.GridWidth, qIndex.X + 3) && !tooClose; i++)
                     for (var j = (int)Math.Max(0, qIndex.Y - 2); j < Math.Min(settings.GridHeight, qIndex.Y + 3) && !tooClose; j++)
-                        if (state.Grid[i, j].HasValue && Vector2.Distance(state.Grid[i, j].Value, q) < settings.MinimumDistance)
+                        if (state.Grid[i, j] != null && Vector2D.Distance(state.Grid[i, j], q) < settings.MinimumDistance)
                             tooClose = true;
 
                 if (!tooClose)
@@ -146,7 +146,7 @@ namespace DelaunatorSharp.WPF
             return found;
         }
 
-        static Vector2 GenerateRandomAround(Vector2 center, float minimumDistance)
+        static Vector2D GenerateRandomAround(Vector2D center, float minimumDistance)
         {
             var d = RandomHelper.Random.NextDouble();
             var radius = minimumDistance + minimumDistance * d;
@@ -157,12 +157,12 @@ namespace DelaunatorSharp.WPF
             var newX = radius * Math.Sin(angle);
             var newY = radius * Math.Cos(angle);
 
-            return new Vector2((float)(center.X + newX), (float)(center.Y + newY));
+            return new Vector2D((float)(center.X + newX), (float)(center.Y + newY));
         }
 
-        static Vector2 Denormalize(Vector2 point, Vector2 origin, double cellSize)
+        static Vector2D Denormalize(Vector2D point, Vector2D origin, double cellSize)
         {
-            return new Vector2((int)((point.X - origin.X) / cellSize), (int)((point.Y - origin.Y) / cellSize));
+            return new Vector2D((int)((point.X - origin.X) / cellSize), (int)((point.Y - origin.Y) / cellSize));
         }
     }
 

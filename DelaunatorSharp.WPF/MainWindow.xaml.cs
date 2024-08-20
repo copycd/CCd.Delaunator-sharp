@@ -1,5 +1,4 @@
-﻿using SlimDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DelaunatorSharp;
+using CCd.Maths;
 
 namespace DelaunatorSharp.WPF
 {
@@ -77,7 +77,7 @@ namespace DelaunatorSharp.WPF
         {
             var width = (float)(ActualWidth != 0 ? ActualWidth : Width);
             var height = (float)(ActualHeight != 0 ? ActualHeight : Height);
-            var samples = UniformPoissonDiskSampler.SampleCircle(new Vector2(width / 2, height / 3), 220, 40).Select(x => new Point(x.X, x.Y));
+            var samples = UniformPoissonDiskSampler.SampleCircle(new Vector2D(width / 2, height / 3), 220, 40).Select(x => new Point(x.X, x.Y));
 
             foreach (var sample in samples)
             {
